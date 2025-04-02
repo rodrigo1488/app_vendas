@@ -150,6 +150,32 @@ def get_vendas_dia():
         return jsonify({"error": str(e)}), 500
 
 
+@app.route('/total_dia', methods=['GET'])
+def get_total_dia():
+    try:
+        # Obtém a data de hoje
+        hoje = datetime.datetime.now().strftime('%Y-%m-%d')
+
+        # Consulta as vendas feitas hoje
+        query = text("""
+            SELECT SUM(valor_total) AS total_vendas
+            FROM vendas
+            WHERE DATE(data_hora) = :hoje
+        """)
+        
+        # Executa a consulta com a data de hoje
+        result = db.session.execute(query, {'hoje': hoje}).fetchall()
+
+        if result:
+            # Retorna os resultados no formato JSON
+            return jsonify([dict(row._mapping) for row in result]), 200
+        else:
+            return jsonify({"message": "Nenhuma venda registrada para hoje"}), 404
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+
+
 
 
 # Rodando a aplicação Flask
