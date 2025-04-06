@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Comandas</title>
+</head>
+<body>
+    <h1>Comandas</h1>
+    <button onclick="listarComandas()">Listar Comandas</button>
+    <ul id="comandas">
+
+    </ul>
+
+    <script>
+/**
+ * Fetches a list of active comandas from the server and displays them in the HTML list element with id 'comandas'.
+ * Each comanda is represented as a list item with its id, table number (numeromesa), and total value (valortotal_comanda).
+ */
+
+        function listarComandas() {
+            fetch('/listarcomandas')
+                .then(res => res.json())
+                .then(data => {
+                    const comandas = document.getElementById('comandas');
+                    comandas.innerHTML = '';
+                    data.forEach(comanda => {
+                        const li = document.createElement('li');
+                        li.textContent = `Comanda ${comanda.numeromesa}  - Valor Total: ${comanda.valortotal_comanda}`;
+                        comandas.appendChild(li);
+                    });
+                })
+        }
+    </script>
+</body>
+</html>
