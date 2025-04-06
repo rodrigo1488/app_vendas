@@ -14,9 +14,10 @@ finalizar_venda_bp = Blueprint('finalizar_venda_bp', __name__)
 ###ROTA PARA FINALIZAR COMANDA####
 @finalizar_venda_bp.route('/finalizar_venda', methods=['POST'])
 def finalizar_venda():
+    now = datetime.datetime.now()
     try:
-        data = request.get_json()
-        numero_comanda = data.get("numero_comanda")
+        data = now.strftime('%D-%m-%Y %H:%M:%S')
+        numero_comanda = data.get("numeromesa")
         meio_pagamento = data.get("meio_pagamento")
         valor_total = data.get("valor_total")
         id_garcom = data.get("id_garcom")

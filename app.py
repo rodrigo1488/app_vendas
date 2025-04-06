@@ -13,6 +13,7 @@ from routes.listar_vendas_fechadas import listar_vendas_fechadas_bp
 from routes.listar_totais import listar_totais_bp
 from routes.comandas import comandas_bp
 from routes.listar_comandas import listar_comandas_bp
+from routes.desempenho_garcom import desempenho_garcom_bp
 
 # Inicializa o app Flask
 app = Flask(__name__)
@@ -51,6 +52,7 @@ app.register_blueprint(listar_comandas_bp)
 app.register_blueprint(listar_totais_bp)
 app.register_blueprint(listar_vendas_fechadas_bp)
 app.register_blueprint(total_dia_bp)
+app.register_blueprint(desempenho_garcom_bp)
 
 def run_flask():
     app.run(debug=True, host="0.0.0.0", port=5000)
