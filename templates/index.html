@@ -1,34 +1,81 @@
 <!DOCTYPE html>
-<html>
+<html lang="pt-br">
 <head>
-    <title>Comandas</title>
+  <meta charset="UTF-8">
+  <title>Finalizar Comanda</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 500px;
+      margin: 2rem auto;
+    }
+    input, select, button {
+      display: block;
+      width: 100%;
+      margin-bottom: 1rem;
+      padding: 0.5rem;
+    }
+  </style>
 </head>
 <body>
-    <h1>Comandas</h1>
-    <button onclick="listarComandas()">Listar Comandas</button>
-    <ul id="comandas">
 
-    </ul>
+  <h2>Finalizar Comanda</h2>
 
-    <script>
-/**
- * Fetches a list of active comandas from the server and displays them in the HTML list element with id 'comandas'.
- * Each comanda is represented as a list item with its id, table number (numeromesa), and total value (valortotal_comanda).
- */
+  <form id="finalizarForm">
+    <label>Número da Mesa:</label>
+    <input type="text" name="numeromesa" required>
 
-        function listarComandas() {
-            fetch('/listarcomandas')
-                .then(res => res.json())
-                .then(data => {
-                    const comandas = document.getElementById('comandas');
-                    comandas.innerHTML = '';
-                    data.forEach(comanda => {
-                        const li = document.createElement('li');
-                        li.textContent = `Comanda ${comanda.numeromesa}  - Valor Total: ${comanda.valortotal_comanda}`;
-                        comandas.appendChild(li);
-                    });
-                })
-        }
-    </script>
+    <label>Meio de Pagamento:</label>
+    <select name="meio_pagamento" required>
+      <option value="dinheiro">Dinheiro</option>
+      <option value="cartao">Cartão</option>
+      <option value="pix">PIX</option>
+    </select>
+
+    <label>Valor Total (R$):</label>
+    <input type="number" step="0.01" name="valor_total" required>
+
+    <label>ID do Garçom:</label>
+    <input type="number" name="id_garcom" required>
+
+    <button type="submit">Finalizar Venda</button>
+  </form>
+
+  <div id="resposta"></div>
+
+  <script>
+    const form = document.getElementById('finalizarForm');
+    const resposta = document.getElementById('resposta');
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      const formData = new FormData(form);
+      const data = {
+        numeromesa: formData.get('numeromesa'),
+        meio_pagamento: formData.get('meio_pagamento'),
+        valor_total: formData.get('valor_total'),
+        id_garcom: formData.get('id_garcom')
+      };
+
+      try {
+        const response = await fetch('/finalizar_venda', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(data)
+        });
+
+        const result = await response.json();
+        resposta.innerText = response.ok
+          ? result.message
+          : `Erro: ${result.error || 'Erro inesperado.'}`;
+      } catch (err) {
+        resposta.innerText = `Erro de conexão: ${err.message}`;
+      }
+    });
+  </script>
+
 </body>
 </html>

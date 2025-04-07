@@ -1,4 +1,4 @@
-from flask import Flask
+from flask import Flask,render_template, jsonify, request, redirect, url_for
 from flask_cors import CORS
 from sqlalchemy import text
 from waitress import serve
@@ -18,6 +18,10 @@ from routes.desempenho_garcom import desempenho_garcom_bp
 # Inicializa o app Flask
 app = Flask(__name__)
 CORS(app)
+
+@app.route('/')
+def index():
+    return render_template('index.html')
 
 # Configuração do banco PostgreSQL
 DB_NAME = "unico"
