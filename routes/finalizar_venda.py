@@ -13,11 +13,11 @@ finalizar_venda_bp = Blueprint('finalizar_venda_bp', __name__)
 
 @finalizar_venda_bp.route('/finalizar_venda', methods=['POST'])
 def finalizar_venda():
-    import datetime
     now = datetime.datetime.now()
+    horario_fechamento = now.strftime('%Y-%m-%d %H:%M:%S')  # <- Aqui pega o horário atual
 
     try:
-        data = request.get_json()  # <- aqui sim você pega o JSON corretamente
+        data = request.get_json()
 
         numero_comanda = data.get("numeromesa")
         meio_pagamento = data.get("meio_pagamento")
@@ -28,26 +28,29 @@ def finalizar_venda():
         if not all([numero_comanda, meio_pagamento, valor_total, numeromesa]):
             return jsonify({"error": "Todos os campos são obrigatórios"}), 400
 
-        # Inserir a venda no SQLite
+        # Inserir a venda no SQLite com horário atual
         conn = sqlite3.connect(CAMINHO_DB_LOCAL)
         cur = conn.cursor()
         cur.execute("""
-            INSERT INTO vendas (numero_comanda, meio_pagamento, valor_total, id_garcom)
-            VALUES (?, ?, ?, ?)
-        """, (numero_comanda, meio_pagamento, valor_total, id_garcom))
+            INSERT INTO vendas (numero_comanda, meio_pagamento, valor_total, id_garcom, data_hora)
+            VALUES (?, ?, ?, ?, ?)
+        """, (numero_comanda, meio_pagamento, valor_total, id_garcom, horario_fechamento))
         conn.commit()
         conn.close()
 
-        # Atualizar o status da mesa no banco via SQLAlchemy
+        # Atualizar status da mesa
         query = text("""
             UPDATE contamesa 
             SET status = 4, horafechamento = CURRENT_TIMESTAMP
-            WHERE numeromesa = :numeromesa
+            WHERE numeromesa = :numeromesa 
         """)
         db.session.execute(query, {'numeromesa': numeromesa})
         db.session.commit()
 
-        return jsonify({"message": f"Venda registrada e mesa {numeromesa} fechada com sucesso."}), 201
+        return jsonify({
+            "message": f"Venda registrada e mesa {numeromesa} fechada com sucesso.",
+            "data_hora": horario_fechamento  # opcional: pode retornar ao front
+        }), 201
 
     except Exception as e:
         return jsonify({"error": str(e)}), 500
