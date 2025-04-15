@@ -49,11 +49,11 @@ def get_vendas_por_dia_mes_atual():
 
 
 ###ROTA PARA LISTAR TOTAL DE VENDAS NO PERÍODO DE 120 DIAS ####        
-@listar_totais_bp.route('/vendas120dias', methods=['GET'])
-def get_vendas_por_mes_120_dias():
+@listar_totais_bp.route('/vendas180dias', methods=['GET'])
+def get_vendas_por_mes_180_dias():
     try:
         hoje = datetime.datetime.now()
-        data_inicio = (hoje - datetime.timedelta(days=120)).strftime('%Y-%m-%d')
+        data_inicio = (hoje - datetime.timedelta(days=180)).strftime('%Y-%m-%d')
 
         conn = sqlite3.connect(CAMINHO_DB_LOCAL)
         cur = conn.cursor()

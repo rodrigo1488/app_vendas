@@ -18,30 +18,27 @@ def finalizar_venda():
 
     try:
         data = request.get_json()
-
-        numero_comanda = data.get("numeromesa")
+        
         meio_pagamento = data.get("meio_pagamento")
         valor_total = data.get("valor_total")
         id_garcom = data.get("id_garcom")
         numeromesa = data.get("numeromesa")
-
-        if not all([numero_comanda, meio_pagamento, valor_total, numeromesa]):
-            return jsonify({"error": "Todos os campos são obrigatórios"}), 400
-
+       
+        
         # Inserir a venda no SQLite com horário atual
         conn = sqlite3.connect(CAMINHO_DB_LOCAL)
         cur = conn.cursor()
         cur.execute("""
             INSERT INTO vendas (numero_comanda, meio_pagamento, valor_total, id_garcom, data_hora)
             VALUES (?, ?, ?, ?, ?)
-        """, (numero_comanda, meio_pagamento, valor_total, id_garcom, horario_fechamento))
+        """, (numeromesa, meio_pagamento, valor_total, id_garcom, horario_fechamento))
         conn.commit()
         conn.close()
 
         # Atualizar status da mesa
         query = text("""
             UPDATE contamesa 
-            SET status = 4, horafechamento = CURRENT_TIMESTAMP
+            SET status = 99, horafechamento = CURRENT_TIMESTAMP,ECFCUPOM ='FINALIZADO PELO APP '
             WHERE numeromesa = :numeromesa 
         """)
         db.session.execute(query, {'numeromesa': numeromesa})

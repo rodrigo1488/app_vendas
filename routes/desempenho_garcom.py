@@ -39,7 +39,7 @@ def desempenho_garcom():
         for id_garcom, total in rows:
             # Consulta no banco Postgres usando SQLAlchemy
             query = text("""
-                SELECT nome FROM entidade WHERE codigo = :codigo
+                SELECT nome FROM entidade WHERE id = :codigo
             """)
             result = db.session.execute(query, {'codigo': str(id_garcom)}).fetchone()
             nome = result[0] if result else 'Desconhecido'

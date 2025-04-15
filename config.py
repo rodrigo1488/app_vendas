@@ -10,10 +10,11 @@ CAMINHO_DB_LOCAL = "vendas.db"
 # Instância global do SQLAlchemy (usada no app principal e nos blueprints)
 db = SQLAlchemy()
 
-# Função para inicializar o banco SQLite local
+
 def inicializar_banco_sqlite():
     conn = sqlite3.connect(CAMINHO_DB_LOCAL)
     cur = conn.cursor()
+
     cur.execute("""
         CREATE TABLE IF NOT EXISTS vendas (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -24,7 +25,30 @@ def inicializar_banco_sqlite():
             id_garcom INTEGER
         )
     """)
+
+    cur.execute("""
+        CREATE TABLE IF NOT EXISTS FECHAMENTO_CAIXA (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            total_caixa REAL,
+            total_contado REAL,
+            total_abertura REAL,
+            data_hora TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            operador TEXT,
+            observacao TEXT
+        )
+    """)
+
+    cur.execute("""
+        CREATE TABLE IF NOT EXISTS USUARIOS (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            nome TEXT NOT NULL,
+            senha TEXT NOT NULL,
+            adm BOLEAN DEFALT FALSE
+        )
+    """)
+
     conn.commit()
     conn.close()
+
 
 inicializar_banco_sqlite()
