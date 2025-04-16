@@ -25,7 +25,7 @@ def login():
     conn.close()
 
     if user:
-        return jsonify({"message": "Login bem-sucedido", "user": {"id": user[0], "nome": user[1], "adm": user[2]}}), 200
+        return jsonify({"message": "Login bem-sucedido", "user": {"id": user[0], "nome": user[1] , "senha": user[2], "adm": user[3]}}), 200
     else:
         return jsonify({"error": "Credenciais inválidas"}), 401 
 
