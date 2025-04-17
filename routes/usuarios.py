@@ -37,6 +37,8 @@ def listar_usuarios():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
+
+###
 @usuarios_bp.route('/deletar_usuario/<int:id>', methods=['DELETE'])
 def deletar_usuario(id):
     try:
@@ -70,3 +72,16 @@ def atualizar_usuario(id):
     except Exception as e:
         return jsonify({"error": str(e)}), 500  
 
+
+
+@usuarios_bp.route('/buscar_usuario/<int:id>', methods=['GET'])
+def buscar_usuario(id):
+    try:        
+        conn = sqlite3.connect(CAMINHO_DB_LOCAL)
+        cur = conn.cursor()
+        cur.execute("SELECT id, nome, senha, adm FROM usuarios where id = ?", (id,))
+        result = cur.fetchall()
+        conn.close()
+        return jsonify([{ "id": row[0], "nome": row[1], "senha": row[2], "adm": row[3] } for row in result]), 200
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500

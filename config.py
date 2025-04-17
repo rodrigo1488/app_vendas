@@ -47,6 +47,15 @@ def inicializar_banco_sqlite():
         )
     """)
 
+    cur.execute("""
+        CREATE TABLE IF NOT EXISTS IMPRESSORAS(
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            ip TEXT NOT NULL,
+            nome_impressora TEXT NOT NULL,
+            porta INTEGER NOT NULL
+        )
+        """)
+
     conn.commit()
     conn.close()
 
