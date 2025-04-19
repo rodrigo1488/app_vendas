@@ -45,18 +45,52 @@ def fechamento():
 @fechamento_bp.route('/listar_fechamentos', methods=['GET'])
 def listar_fechamentos():
     try:
+        page = int(request.args.get('page', 1))
+        per_page = 10
+        offset = (page - 1) * per_page
+
         conn = sqlite3.connect(CAMINHO_DB_LOCAL)
         cur = conn.cursor()
-        query="""
+
+        cur.execute("""
+            SELECT COUNT(*) FROM FECHAMENTO_CAIXA;
+        """)
+        total_count = cur.fetchone()[0]
+
+
+        query=("""
             SELECT id,total_caixa,total_contado, total_abertura,operador, observacao, data_hora FROM FECHAMENTO_CAIXA
             ORDER BY data_hora ASC
-            LIMIT 10
-            
-        """
-        cur.execute(query)
+            LIMIT ? OFFSET ?
+        """)
+        cur.execute(query, (per_page, offset))
         result = cur.fetchall()
         conn.close()
-        return jsonify([{ "id": row[0], "total_caixa": row[1], "total_contado": row[2], "total_abertura": row[3], "operador": row[4], "observacao": row[5], "data_hora": row[6]  } for row in result]), 200
+
+        if result:
+            fechamentos = [{
+                "id": row[0],
+                "total_caixa": row[1],
+                "total_contado": row[2],
+                "total_abertura": row[3],
+                "operador": row[4],
+                "observacao": row[5],
+                "data_hora": row[6]
+            }  for row in result]
+
+            return jsonify({
+                "page": page,
+                "per_page": per_page,
+                "total_count": total_count,
+                "fechamentos": fechamentos
+            }), 200
+        else:
+            return jsonify({
+                "page": page,
+                "per_page": per_page,
+                "total_count": total_count,
+                "fechamentos": []
+            }), 200
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 

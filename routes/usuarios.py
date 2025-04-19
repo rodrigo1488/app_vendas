@@ -28,12 +28,49 @@ def cadastrar_usuario():
 @usuarios_bp.route('/listar_usuarios', methods=['GET'])
 def listar_usuarios():
     try:
+        page = int(request.args.get('page', 1))
+        per_page = 10
+        offset = (page - 1) * per_page
+
         conn = sqlite3.connect(CAMINHO_DB_LOCAL)
         cur = conn.cursor()
-        cur.execute("SELECT id, nome, senha, adm FROM usuarios")
+        
+
+        cur.execute("""
+            SELECT COUNT(*) FROM  usuarios
+        """)
+        total_usuarios = cur.fetchone()[0]
+
+        cur.execute("""
+            SELECT id, nome, senha, adm FROM usuarios
+            ORDER BY nome ASC
+            LIMIT ? OFFSET ?
+        """, (per_page, offset))
+
         result = cur.fetchall()
         conn.close()
-        return jsonify([{ "id": row[0], "nome": row[1], "senha": row[2], "adm": row[3] } for row in result]), 200
+
+        if result:
+            usuarios = [{
+                "id":  row[0],
+                "nome": row[1],
+                "senha": row[2],
+                "adm": row[3]
+            } for row in result]
+
+            return jsonify({
+                "page": page,
+                "per_page": per_page,
+                "total_usuarios": total_usuarios,
+                "usuarios": usuarios
+            }), 200
+        else:
+            return jsonify({
+                "page": page,
+                "per_page": per_page,
+                "total_usuarios": total_usuarios,
+                "usuarios": [],
+            })
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
