@@ -13,58 +13,62 @@ listar_vendas_fechadas_bp = Blueprint('listar_vendas_fechadas_bp', __name__)
 from flask import request
 
 @listar_vendas_fechadas_bp.route('/finalizadas', methods=['GET'])
-def get_comadas_finalizadas():
+def get_comandas_finalizadas():
     try:
-        # Obtem os parâmetros de paginação da query string
-        page = int(request.args.get('page', 1))
-        per_page = int(request.args.get('per_page', 10))
-        
-        offset = (page - 1) * per_page
+        # Filtros e paginação
+        numero_comanda = request.args.get('numero_comanda')  # Parâmetro que estamos utilizando para filtrar
+        page = int(request.args.get('page', 1))  # Página atual
+        per_page = int(request.args.get('per_page', 10))  # Registros por página
+        offset = (page - 1) * per_page  # Cálculo de offset para paginação
 
-        conn = sqlite3.connect(CAMINHO_DB_LOCAL)
+        conn = sqlite3.connect(CAMINHO_DB_LOCAL)  # Conexão com o banco de dados
         cur = conn.cursor()
 
-        # Conta o total de vendas
-        cur.execute("""
-            SELECT COUNT(*) FROM vendas
-        """)
-        total_count = cur.fetchone()[0]
+        # Base da query
+        where_clause = ""  # Inicializamos sem filtros
+        params = []  # Lista para os parâmetros da consulta
 
-        cur.execute("""
+        if numero_comanda:  # Se o parâmetro numero_comanda for passado
+            where_clause = "WHERE numero_comanda = ?"  # Adicionamos o filtro na cláusula WHERE
+            params.append(numero_comanda)  # Adicionamos o valor do parâmetro para ser usado na consulta
+
+        # Total de registros
+        cur.execute(f"SELECT COUNT(*) FROM vendas {where_clause}", params)  # Conta o total de registros com o filtro
+        total_count = cur.fetchone()[0]  # Obtemos o total de registros
+
+        # Consulta paginada com a cláusula WHERE (se necessário)
+        query = f"""
             SELECT id, numero_comanda, meio_pagamento, valor_total, data_hora, id_garcom
             FROM vendas
+            {where_clause}  -- Condicionalmente insere WHERE ou nada
             ORDER BY data_hora DESC
             LIMIT ? OFFSET ?
-        """, (per_page, offset))
+        """
+        cur.execute(query, params + [per_page, offset])  # Executa a consulta com paginação
+        rows = cur.fetchall()  # Obtém os resultados da consulta
+        conn.close()  # Fecha a conexão com o banco
 
-        result = cur.fetchall()
-        conn.close()
+        # Preparando os dados para resposta
+        vendas = [
+            {
+                "id": r[0],
+                "numero_comanda": r[1],
+                "meio_pagamento": r[2],
+                "valor_total": r[3],
+                "data_hora": r[4],
+                "id_garcom": r[5]
+            }
+            for r in rows
+        ]
 
-        if result:
-            vendas = [
-                {
-                    "id": row[0],
-                    "numero_comanda": row[1],
-                    "meio_pagamento": row[2],
-                    "valor_total": row[3],
-                    "data_hora": row[4],
-                    "id_garcom": row[5]
-                }
-                for row in result
-            ]
-            return jsonify({
-                "page": page,
-                "per_page": per_page,
-                "total_count": total_count,
-                "vendas": vendas
-            }), 200
-        else:
-            return jsonify({
-                "page": page,
-                "per_page": per_page,
-                "total_count": total_count,
-                "vendas": [],
-            }), 200
+        # Retorna a resposta com os dados de vendas
+        return jsonify({
+            "page": page,
+            "per_page": per_page,
+            "total_count": total_count,
+            "vendas": vendas
+        }), 200
 
     except Exception as e:
+        # Em caso de erro, retornamos a mensagem de erro
         return jsonify({"error": str(e)}), 500

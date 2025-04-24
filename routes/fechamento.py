@@ -7,7 +7,7 @@ import sqlite3
 import os
 import datetime
 from config import inicializar_banco_sqlite, CAMINHO_DB_LOCAL, db
-from escpos.printer import Network
+from escpos.printer import Network, File, Win32Raw
 
 
 fechamento_bp = Blueprint('fechamento_bp', __name__)
@@ -98,7 +98,7 @@ def listar_fechamentos():
 
 
 
-IMPRESSORA_PORTA = 9100  # define isso como constante global, se ainda não tiver
+
 
 def imprimir_fechamento(total_caixa, total_contado, operador, observacao, data_fechamento,total_abertura, end_imp):
     """Envia os dados de fechamento para a impressora térmica usando ESC/POS"""
@@ -106,7 +106,8 @@ def imprimir_fechamento(total_caixa, total_contado, operador, observacao, data_f
         impressora_ip =  end_imp  # IP da impressora, pode ser passado como argumento
         print(end_imp)
 
-        p = Network(impressora_ip, IMPRESSORA_PORTA)
+       
+        p = Win32Raw(impressora_ip )
         p.set(align='center')
         p.text('\x1B\x21\x08')  # tamanho de fonte um pouco maior
         p.text("=== FECHAMENTO DE CAIXA ===\n\n")
