@@ -107,7 +107,7 @@ def imprimir_fechamento(total_caixa, total_contado, operador, observacao, data_f
         print(end_imp)
 
        
-        p = Win32Raw(impressora_ip )
+        p = Network(impressora_ip )
         p.set(align='center')
         p.text('\x1B\x21\x08')  # tamanho de fonte um pouco maior
         p.text("=== FECHAMENTO DE CAIXA ===\n\n")

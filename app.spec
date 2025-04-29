@@ -2,6 +2,7 @@
 from PyInstaller.utils.hooks import collect_submodules
 
 hiddenimports = []
+hiddenimports += collect_submodules('escpos')
 hiddenimports += collect_submodules('routes')
 
 
@@ -9,7 +10,7 @@ a = Analysis(
     ['app.py'],
     pathex=[],
     binaries=[],
-    datas=[('templates', 'templates'), ('icon.ico', '.')],
+    datas=[('C:\\Users\\SUPORTE RODRIGO\\AppData\\Local\\Programs\\Python\\Python313\\Lib\\site-packages\\escpos\\capabilities.json', 'escpos')],
     hiddenimports=hiddenimports,
     hookspath=[],
     hooksconfig={},
